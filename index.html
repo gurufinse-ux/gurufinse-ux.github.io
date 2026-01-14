@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GURU Wallet 설치</title>
+    <title>GURU Wallet 연결</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -29,7 +29,6 @@
             font-size: 16px;
             line-height: 1.5;
         }
-        /* 눈에 잘 띄는 다운로드 버튼 스타일 */
         .store-btn {
             background-color: #007AFF; 
             color: white;
@@ -49,40 +48,60 @@
     <script>
         window.onload = function() {
             // ==========================================
-            // [입력된 정보]
+            // [설정 정보]
             // ==========================================
             var ANDROID_PACKAGE = "com.gurufin.wallet"; 
             var IOS_APP_ID = "6740982061"; 
+            
+            // 앱의 스킴 주소 (Android Manifest / iOS Info.plist에 설정된 값)
+            // 예: guruwallet://app/send?to=...
+            var APP_SCHEME_BASE = "guruwallet://app/send"; 
             // ==========================================
 
             var userAgent = navigator.userAgent;
             var isAndroid = /android/i.test(userAgent);
             var isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
             
+            // 1. 스토어 주소 결정
             var storeUrl = "";
-
             if (isAndroid) {
-                // 안드로이드: Play 스토어 앱 직접 호출 (market://)
                 storeUrl = "market://details?id=" + ANDROID_PACKAGE;
             } else if (isIOS) {
-                // iOS: 앱스토어 링크
                 storeUrl = "https://apps.apple.com/app/id" + IOS_APP_ID;
             } else {
-                // PC 등 기타: 웹 플레이 스토어로 안내
                 storeUrl = "https://play.google.com/store/apps/details?id=" + ANDROID_PACKAGE;
             }
 
-            // 1. 화면의 버튼에 링크 연결 (자동 이동 실패 대비)
-            var btn = document.getElementById("download-btn");
-            btn.href = storeUrl;
-            
-            // 2. 텍스트 변경
-            if (isAndroid) btn.innerText = "Google Play로 이동";
-            else if (isIOS) btn.innerText = "App Store로 이동";
+            // 2. 딥링크 주소 생성 (현재 페이지의 파라미터 ?to=... 등을 그대로 앱에 전달)
+            var currentParams = window.location.search; // "?to=guru1...&amt=10..." 부분
+            var deepLink = APP_SCHEME_BASE + currentParams;
 
-            // 3. [핵심] 자동으로 스토어 이동 실행
-            // 브라우저가 자동 이동을 막지 않는다면 즉시 실행됩니다.
-            window.location.replace(storeUrl);
+            // 3. 버튼 세팅 (자동 이동 실패 시 수동 클릭용)
+            var btn = document.getElementById("download-btn");
+            btn.href = storeUrl; // 기본적으로 버튼은 스토어로 연결해둠
+            
+            if (isAndroid) btn.innerText = "Google Play에서 보기";
+            else if (isIOS) btn.innerText = "App Store에서 보기";
+            
+            // 4. [핵심] 앱 실행 시도 후 실패 시 스토어 이동 (시간차 공격)
+            
+            var start = new Date().getTime();
+            
+            // 앱 실행 시도
+            window.location.href = deepLink;
+
+            // 0.5초(500ms) ~ 2초 뒤에 확인
+            // 앱이 뜨면 브라우저가 백그라운드로 가서 이 타이머가 멈추거나 늦게 실행됨
+            setTimeout(function() {
+                var end = new Date().getTime();
+                
+                // 지정된 시간(여기선 2500ms) 내에 코드가 실행되었다면 
+                // (= 앱으로 화면이 안 넘어가고 브라우저에 계속 있었다면)
+                if (end - start < 2500) { 
+                    // 앱이 없다고 판단하고 스토어로 이동
+                    window.location.replace(storeUrl);
+                }
+            }, 2000);
         };
     </script>
 </head>
@@ -90,8 +109,8 @@
     <div class="logo">GURU Wallet</div>
     
     <div class="message">
-        앱이 설치되어 있지 않습니다.<br>
-        설치 페이지로 이동합니다.
+        앱을 실행하는 중입니다.<br>
+        설치되어 있지 않다면 스토어로 이동합니다.
     </div>
 
     <a id="download-btn" href="#" class="store-btn">
