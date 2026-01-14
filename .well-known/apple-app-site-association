@@ -1,0 +1,11 @@
+  {
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "JG622F2LV6.gurufin-wallet",
+        "paths": ["*"]
+      }
+    ]
+  }
+}
