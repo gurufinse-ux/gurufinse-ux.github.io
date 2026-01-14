@@ -1,1 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GURU Wallet 설치</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #222;
+        }
+        .message {
+            margin-bottom: 40px;
+            color: #666;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        /* 눈에 잘 띄는 다운로드 버튼 스타일 */
+        .store-btn {
+            background-color: #007AFF; 
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,122,255,0.3);
+            transition: transform 0.1s active;
+        }
+        .store-btn:active {
+            transform: scale(0.98);
+            background-color: #006ae6;
+        }
+    </style>
+    <script>
+        window.onload = function() {
+            // ==========================================
+            // [입력된 정보]
+            // ==========================================
+            var ANDROID_PACKAGE = "com.gurufin.wallet"; 
+            var IOS_APP_ID = "6740982061"; 
+            // ==========================================
 
+            var userAgent = navigator.userAgent;
+            var isAndroid = /android/i.test(userAgent);
+            var isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+            
+            var storeUrl = "";
+
+            if (isAndroid) {
+                // 안드로이드: Play 스토어 앱 직접 호출 (market://)
+                storeUrl = "market://details?id=" + ANDROID_PACKAGE;
+            } else if (isIOS) {
+                // iOS: 앱스토어 링크
+                storeUrl = "https://apps.apple.com/app/id" + IOS_APP_ID;
+            } else {
+                // PC 등 기타: 웹 플레이 스토어로 안내
+                storeUrl = "https://play.google.com/store/apps/details?id=" + ANDROID_PACKAGE;
+            }
+
+            // 1. 화면의 버튼에 링크 연결 (자동 이동 실패 대비)
+            var btn = document.getElementById("download-btn");
+            btn.href = storeUrl;
+            
+            // 2. 텍스트 변경
+            if (isAndroid) btn.innerText = "Google Play로 이동";
+            else if (isIOS) btn.innerText = "App Store로 이동";
+
+            // 3. [핵심] 자동으로 스토어 이동 실행
+            // 브라우저가 자동 이동을 막지 않는다면 즉시 실행됩니다.
+            window.location.replace(storeUrl);
+        };
+    </script>
+</head>
+<body>
+    <div class="logo">GURU Wallet</div>
+    
+    <div class="message">
+        앱이 설치되어 있지 않습니다.<br>
+        설치 페이지로 이동합니다.
+    </div>
+
+    <a id="download-btn" href="#" class="store-btn">
+        스토어로 이동하기
+    </a>
+</body>
+</html>
